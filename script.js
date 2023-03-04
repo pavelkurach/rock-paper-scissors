@@ -2,7 +2,7 @@
 
 // To run in NodeJS
 // eslint-disable-next-line import/no-extraneous-dependencies
-const prompt = require("prompt-sync")();
+// const prompt = require("prompt-sync")();
 
 const ITEMS = ["Rock", "Paper", "Scissors"];
 
@@ -38,14 +38,53 @@ const playRound = (playerSelection, computerSelection, score = [0, 0]) => {
     }
 };
 
+const gameOver = (score) => score[0] === 3 || score[1] === 3;
+
+const buttons = document.querySelectorAll("#buttons-container > button");
+const matchResultDiv = document.querySelector("#match-result");
+const scoreDiv = document.querySelector("#score");
+const finalScoreDiv = document.querySelector("#final-score");
+const playAgainMessage = document.querySelector("#play-again-message");
+const playAgainButton = document.querySelector("#play-again-message > button");
+const dim = document.querySelector("#dim");
+
+playAgainMessage.style.display = "none";
+dim.style.display = "none";
+
+const toggleButtons = () => {
+    buttons.forEach((button) => {
+        // eslint-disable-next-line no-param-reassign
+        button.disabled = !button.disabled;
+    });
+};
+
 let score = [0, 0];
 
-for (let i = 0; i < 5; i += 1) {
-    const playerSelection = prompt();
-    const computerSelection = getComputerChoice();
-    const { newScore, message } = playRound(playerSelection, computerSelection, score);
-    score = newScore;
-    console.log(message);
-}
+playAgainButton.addEventListener("click", () => {
+    playAgainMessage.style.display = "none";
+    dim.style.display = "none";
+    score = [0, 0];
+    toggleButtons();
+    matchResultDiv.innerText = "";
+    scoreDiv.innerText = `Current score: You: ${score[0]}, computer: ${score[1]}.`;
+});
 
-console.log(`Final score: You: ${score[0]}, computer: ${score[1]}`);
+buttons.forEach((button) => {
+    button.addEventListener("click", () => {
+        const playerSelection = button.value;
+        const computerSelection = getComputerChoice();
+        const { newScore, message } = playRound(playerSelection, computerSelection, score);
+        matchResultDiv.innerText = message;
+        score = newScore;
+        if (!gameOver(score)) {
+            scoreDiv.innerText = `Current score: You: ${score[0]}, computer: ${score[1]}.`;
+        } else {
+            toggleButtons();
+            scoreDiv.innerText = `Current score: You: ${score[0]}, computer: ${score[1]}.`;
+            dim.style.display = "block";
+            playAgainMessage.style.display = "block";
+            if (score[0] === 3) finalScoreDiv.innerText = "You won!";
+            else finalScoreDiv.innerText = "You lost!";
+        }
+    });
+});
